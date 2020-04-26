@@ -64,14 +64,13 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(Location location) {
                         if(location!=null){
                             local=location.toString();
-                            bob.setText(location.toString());
                         }
                     }
                 });
                 username_input.setText(local);
                 if (username.length() > 4 && password.length() > 4 && !username.equals(password)) {
                     doStuff();
-                    //showToast();
+                    showToast();
                 }
                 else {
                     openDialog();
@@ -86,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
         RequestBody formBody = new FormBody.Builder()
                 .add("username", username)
                 .add("password", password)
-                .add("location", local)
                 .build();
 
         OkHttpClient client = new OkHttpClient().newBuilder()

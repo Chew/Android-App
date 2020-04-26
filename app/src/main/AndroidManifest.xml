@@ -14,7 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".Luboc"/>
-        <activity android:name=".Main_Menu" />
+        <activity android:name=".Main_Menu" >
+        </activity>
         <activity android:name=".Login_Page" />
         <activity android:name=".MainActivity"/>
         <activity android:name=".Splash_Screen">
