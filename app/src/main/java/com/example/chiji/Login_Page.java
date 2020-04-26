@@ -1,16 +1,25 @@
 package com.example.chiji;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.util.Linkify;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
+import android.widget.TextView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.IOException;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -20,51 +29,55 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class MainActivity extends AppCompatActivity {
-
-    String username, password;
-    String key="";
-    EditText username_input;
+public class Login_Page extends AppCompatActivity {
+    Button hello;
+    Button login;
+    EditText name_input;
     EditText pass_input;
-    Button signup;
-
+    String name, pass;
+    String key="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        username_input = findViewById(R.id.username);
-        pass_input = findViewById(R.id.password);
-
-        signup = findViewById(R.id.sign_up);
-        signup.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        setContentView(R.layout.activity_login__page);
+        pass_input=findViewById(R.id.user1);
+        name_input=findViewById(R.id.pass1);
+        hello=findViewById(R.id.buttn6);
+        login=findViewById(R.id.loginbttn);
+        login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                username = username_input.getText().toString();
-                password = pass_input.getText().toString();
-                if (username.length() > 4 && password.length() > 4 && !username.equals(password)) {
-                   // doStuff();
-                    showToast();
+                name = name_input.getText().toString();
+                pass = pass_input.getText().toString();
+                if (name.length() > 4 && pass.length() > 4 && !name.equals(pass)) {
+                  //  Logins();
+                    Intent yeet=new Intent(Login_Page.this, Main_Menu.class);
+                    startActivity(yeet);
                 }
-                else {
-                    openDialog();
-                }
-
-
+                else
+                  openDialog();
             }
         });
+
+        hello.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent bob=new Intent(Login_Page.this,MainActivity.class);
+                startActivity(bob);
+            }
+        });
+
     }
-    public void doStuff()
-    {
+    public void Logins() {
         RequestBody formBody = new FormBody.Builder()
-                .add("username", username)
-                .add("password", password)
+                .add("username", name)
+                .add("password", pass)
                 .build();
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         Request request = new Request.Builder()
-                .url("https://ftt-api.chew.pro/register")
+                .url("https://ftt-api.chew.pro/login")
                 .post(formBody)
                 .build();
 
@@ -98,13 +111,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-    private void showToast() {
-        Intent jump = new Intent(this, Main_Menu.class);
-         startActivity(jump);
-    }
     public void openDialog() {
         ExampleDialog beep=new ExampleDialog();
         beep.show(getSupportFragmentManager(), "Error Message");
     }
 
-}
+    }
