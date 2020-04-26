@@ -50,7 +50,7 @@ public class Login_Page extends AppCompatActivity {
                 name = name_input.getText().toString();
                 pass = pass_input.getText().toString();
                 if (name.length() > 4 && pass.length() > 4 && !name.equals(pass)) {
-                  //  Logins();
+                    Logins();
                     Intent yeet=new Intent(Login_Page.this, Main_Menu.class);
                     startActivity(yeet);
                 }

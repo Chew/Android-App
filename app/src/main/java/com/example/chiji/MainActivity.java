@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
@@ -19,22 +20,34 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.widget.TextView;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
 
 public class MainActivity extends AppCompatActivity {
-
-    String username, password;
+    private FusedLocationProviderClient client;
+    String username, password, local;
     String key="";
     EditText username_input;
     EditText pass_input;
     Button signup;
+    TextView bob;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestPermission();
         setContentView(R.layout.activity_main);
+        client= LocationServices.getFusedLocationProviderClient(this);
         username_input = findViewById(R.id.username);
         pass_input = findViewById(R.id.password);
-
+        bob=findViewById(R.id.textView2);
         signup = findViewById(R.id.sign_up);
         signup.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -42,9 +55,23 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 username = username_input.getText().toString();
                 password = pass_input.getText().toString();
+                if(ActivityCompat.checkSelfPermission(MainActivity.this,ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
+                {
+                    return;
+                }
+                client.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if(location!=null){
+                            local=location.toString();
+                            bob.setText(location.toString());
+                        }
+                    }
+                });
+                username_input.setText(local);
                 if (username.length() > 4 && password.length() > 4 && !username.equals(password)) {
-                   // doStuff();
-                    showToast();
+                    doStuff();
+                    //showToast();
                 }
                 else {
                     openDialog();
@@ -59,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         RequestBody formBody = new FormBody.Builder()
                 .add("username", username)
                 .add("password", password)
+                .add("location", local)
                 .build();
 
         OkHttpClient client = new OkHttpClient().newBuilder()
@@ -101,6 +129,9 @@ public class MainActivity extends AppCompatActivity {
     private void showToast() {
         Intent jump = new Intent(this, Main_Menu.class);
          startActivity(jump);
+    }
+    private void requestPermission(){
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{ACCESS_FINE_LOCATION},1);
     }
     public void openDialog() {
         ExampleDialog beep=new ExampleDialog();
