@@ -1,8 +1,5 @@
 package com.example.chiji;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,25 +7,28 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 //import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
 
 public class MainActivity extends AppCompatActivity {
 
     String username, email, password, content;
-    String key="uEEDkisTQTnVnNWskEpQihgSEoXWZXVQluFRhTcYWtKYgjDwia";
+    String key="";
     EditText username_input;
     EditText email_input;
     EditText pass_input;
@@ -50,54 +50,58 @@ public class MainActivity extends AppCompatActivity {
                 username = username_input.getText().toString();
                 email = email_input.getText().toString();
                 password = pass_input.getText().toString();
-                try {
-                    //POST
-                    GetText();
-                } catch (Exception ex) {
-                    content = (" url exeption! ");
-                }
+                doStuff();
 
-                    showToast();
+                showToast();
             }
         });
     }
+    public void doStuff()
+    {
+        RequestBody formBody = new FormBody.Builder()
+                .add("username", username)
+                .add("password", password)
+                .build();
 
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        Request request = new Request.Builder()
+                .url("https://ftt-api.chew.pro/register")
+                .post(formBody)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+
+            @Override public void onFailure(Call call, IOException e) {
+                System.out.println("FAILED!");
+                e.printStackTrace();
+            }
+
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                try (ResponseBody responseBody = response.body()) {
+
+                    System.out.println(responseBody);
+                    // Figure out how to JSON Parse it, idk
+                    try {
+                        JSONObject json = new JSONObject(responseBody.string());
+                        if(json.getString("status").equals("success")) {
+                            key= json.getString("key");
+                        } else {
+                            key="";
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
+
+    }
     private void showToast() {
         Intent jump = new Intent(this, Main3Activity.class);
         startActivity(jump);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void GetText() throws IOException {
-        System.setProperty("http.agent", "Chrome");
-        URL url = new URL("https://ftt-api.chew.pro/register");
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setDoOutput(true);
-
-        String data = URLEncoder.encode("username", "UTF-8")
-                + "=" + URLEncoder.encode("kittens", "UTF-8");
-      data += "&" + URLEncoder.encode("password", "UTF-8")
-                + "=" + URLEncoder.encode("kitter", "UTF-8");
-        try {
-            //conn.setRequestProperty(key,data);
-            OutputStream dos = conn.getOutputStream();
-            dos.write(("username="+"kitten"+"&password="+"kitten").getBytes());
-            dos.flush();
-            //conn.disconnect();
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-        JSONObject jsonObject = null;
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(
-                conn.getInputStream()))) {
-            jsonObject = new JSONObject(in.readLine());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        conn.disconnect();
-
-    }
 }
